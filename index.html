@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,151 +12,143 @@ body {
     margin: 0;
     font-family: 'Baloo 2', cursive;
     background: linear-gradient(135deg, #ff9a9e, #fecfef);
-    overflow: hidden;
     height: 100vh;
+    overflow: hidden;
+    text-align: center;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    text-align: center;
     transition: 0.4s;
 }
 
 h1 {
-    font-size: 2.5rem;
     color: white;
+    font-size: 2.3rem;
+    padding: 0 20px;
 }
 
-.gif {
-    width: 260px;
-    margin: 20px 0;
-}
-
-.buttons {
-    display: flex;
-    gap: 20px;
+img {
+    width: 220px;
+    margin: 15px 0;
 }
 
 button {
-    padding: 15px 30px;
+    padding: 14px 28px;
     font-size: 18px;
+    border-radius: 40px;
     border: none;
-    border-radius: 50px;
     cursor: pointer;
-    transition: 0.3s;
     font-weight: bold;
+    transition: 0.2s;
+    margin: 8px;
 }
 
 #yesBtn {
     background: #ff4d6d;
     color: white;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
 }
 
 #noBtn {
     background: white;
     color: #ff4d6d;
-    position: relative;
+    position: absolute;
 }
 
-.success {
-    font-size: 2rem;
+.plan-btn {
+    background: white;
+    color: #ff4d6d;
+}
+
+#result {
+    margin-top: 25px;
+    font-size: 1.2rem;
     color: white;
-}
-
-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    pointer-events: none;
 }
 </style>
 </head>
 
-<body onclick="startMusic()">
+<body>
 
-<h1 id="question">MJ… 🥺<br>Will you be my Valentine?</h1>
+<h1 id="question">MJ 🥺<br>Will you be my Valentine?</h1>
 
-<img id="valGif" class="gif"
-src="https://media.giphy.com/media/MDJ9IbxxvDUQM/giphy.gif">
+<img id="gif" src="https://media.giphy.com/media/MDJ9IbxxvDUQM/giphy.gif">
 
-<div class="buttons">
-    <button id="yesBtn">YES OF COURSE 💖</button>
-    <button id="noBtn">No 🙃</button>
-</div>
-
-<audio id="bgMusic" loop>
-    <source src="https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav" type="audio/wav">
-</audio>
-
-<canvas id="confetti"></canvas>
+<button id="yesBtn">YES 💖</button>
+<button id="noBtn">No 🙃</button>
 
 <script>
 const noBtn = document.getElementById("noBtn");
 const yesBtn = document.getElementById("yesBtn");
 const question = document.getElementById("question");
-const gif = document.getElementById("valGif");
-const canvas = document.getElementById("confetti");
-const ctx = canvas.getContext("2d");
-const music = document.getElementById("bgMusic");
+const gif = document.getElementById("gif");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
+let noClicks = 0;
 let yesScale = 1;
 
-function startMusic() {
-    music.play().catch(() => {});
-}
+const noMessages = [
+    "Are you sure? 🥺",
+    "MJ please 😭",
+    "Think carefully...",
+    "This feels wrong",
+    "You really thought that would work?",
+    "Okay now you're just being dramatic"
+];
 
-noBtn.addEventListener("mouseover", () => {
-    const x = Math.random() * (window.innerWidth - 120);
-    const y = Math.random() * (window.innerHeight - 60);
-    noBtn.style.position = "absolute";
-    noBtn.style.left = x + "px";
-    noBtn.style.top = y + "px";
+// Move No button safely (mobile + desktop)
+function moveNo() {
+    const maxX = window.innerWidth - noBtn.offsetWidth - 20;
+    const maxY = window.innerHeight - noBtn.offsetHeight - 20;
 
-    yesScale += 0.1;
+    noBtn.style.left = Math.random() * maxX + "px";
+    noBtn.style.top = Math.random() * maxY + "px";
+
+    noBtn.innerText = noMessages[noClicks % noMessages.length];
+    noClicks++;
+
+    yesScale += 0.06;
     yesBtn.style.transform = `scale(${yesScale})`;
-});
-
-yesBtn.addEventListener("click", () => {
-    question.innerHTML = "SHE SAID YES!!! 💍💖";
-    gif.src = "https://media.giphy.com/media/5GoVLqeAOo6PK/giphy.gif";
-    document.body.style.background = "#ff4d6d";
-    launchConfetti();
-    shakeScreen();
-});
-
-function shakeScreen() {
-    document.body.style.animation = "shake 0.3s";
-    setTimeout(() => {
-        document.body.style.animation = "";
-    }, 300);
 }
 
-function launchConfetti() {
-    let pieces = [];
-    for (let i = 0; i < 200; i++) {
-        pieces.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height - canvas.height,
-            size: Math.random() * 8 + 4,
-            speed: Math.random() * 3 + 2
-        });
+noBtn.addEventListener("mouseenter", moveNo);
+noBtn.addEventListener("touchstart", function(e){
+    e.preventDefault();
+    moveNo();
+});
+
+// YES clicked
+yesBtn.addEventListener("click", () => {
+    document.body.innerHTML = `
+        <div style="padding:30px;">
+            <h1 style="color:white;">SHE SAID YESSS 💖</h1>
+            <img src="https://media.giphy.com/media/5GoVLqeAOo6PK/giphy.gif" width="220">
+            <h2 style="color:white;">Choose our Valentine’s Plan:</h2>
+
+            <button class="plan-btn" onclick="selectPlan('dinner')">🍝 Romantic Dinner</button>
+            <button class="plan-btn" onclick="selectPlan('movie')">🎥 Movie Night</button>
+            <button class="plan-btn" onclick="selectPlan('surprise')">✈️ Surprise Me</button>
+
+            <div id="result"></div>
+        </div>
+    `;
+});
+
+function selectPlan(plan) {
+    const result = document.getElementById("result");
+
+    if(plan === "dinner") {
+        result.innerHTML = "Reservation vibes. Candlelight. You looking unreal. Elite choice.";
+    }
+    if(plan === "movie") {
+        result.innerHTML = "Blanket. Snacks. Your head on my shoulder. Cinema but better.";
+    }
+    if(plan === "surprise") {
+        result.innerHTML = "Mystery activated. Dress cute. Trust the process.";
     }
 
-    function update() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        pieces.forEach(p => {
-            ctx.fillStyle = "white";
-            ctx.fillRect(p.x, p.y, p.size, p.size);
-            p.y += p.speed;
-        });
-        requestAnimationFrame(update);
-    }
-
-    update();
+    setTimeout(() => {
+        result.innerHTML += "<br><br>Also… I’m genuinely really lucky to have you MJ 💖";
+    }, 2500);
 }
 </script>
 
